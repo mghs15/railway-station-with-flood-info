@@ -43,3 +43,6 @@ node lineup.js
 * 重ねるハザードマップ
 	* https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html
 	* 洪水浸水想定区域（想定最大規模）、高潮浸水想定区域
+
+## 参考文献
+* http://officeopenxml.com/drwSp-nvCxnSpPr.php
