@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>駅とハザードのスライド</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<style>
+body { margin:0; padding:0;}
+
+#note {
+  margin: 1em;
+}
+
+.strong {
+  color: red;
+}
+
+#main {
+  margin: 1em;
+}
+
+#question {
+  margin: 1em;
+}
+
+
+.slide {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-row: auto 1fr auto;
+  border: solid 1px rgb(0,0,100);
+  margin-bottom: 1em;
+}
+
+.title {
+  background-color: rgb(0,0,100);
+  color: rgb(255,255,255);
+  text-align: center;
+}
+
+.contents {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 52px);
+  row-gap: 0.5em;
+  padding: 0.5em;
+}
+
+.footer { 
+  padding: 0.25em;
+  text-align: right;
+}
+
+.set {
+  display: grid;
+  grid-template-columns: 25px 25px;
+}
+
+.interval {
+  display: inline-block;
+  width: 25px;
+  background-color: rgb(0,0,100);
+  margin-top: 1em;
+}
+
+.station {
+  display: inline-block;
+  width: 25px;
+  border-radius: 4px;
+  border: solid 1px rgb(0,0,100);
+  height: 100%;
+  text-align: center;
+  cursor: pointer;
+}
+
+
+</style>
+<body>
+
+<div id='note'>
+<strong class='strong'>本サイトのハザードの情報はあくまで目安であり、実際のリスクはハザードマップ等を確認してください。また、単純に誤りが含まれる場合もあります。</strong>
+<br>
+本サイトは、鉄道駅のデータ（<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html" target="_blank">国土数値情報（令和4年度）</a>）から生成した代表点におけるハザード情報（<a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html" target="_blank">重ねるハザードマップ</a>の洪水浸水想定区域（想定最大規模））に応じて色分けしたものです。駅の構造や構造物の高さ、周辺の状況は考慮していません。<a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html" target="_blank">第12回大都市交通センサス</a>の下り輸送定員データを用いて、路線ごとの駅の順序や駅間の定員情報を示していますが、平成28年当時なので、現在と状況が異なる場合があります。</div>
+
+<div id='question'></div>
+<div id='main'></div>
+
+<script>
+
+const loadJSON = function(path){
+  
+  let data;
+  
+  const xhr = new XMLHttpRequest();
+  xhr.open('GET', path, false);
+  xhr.send(null);
+  
+  if(xhr.status == 200 || xhr.status == 304){
+    data = JSON.parse(xhr.responseText);
+  }
+  
+  return data;
+}
+
+const getQueryParams = () => {
+  const q = window.location.search;
+  const qq = q.slice(1);
+  const qset = qq.split("&");
+  const qobj = {};
+  qset.forEach( c => {
+    const cc = c.split("=");
+    qobj[cc[0]] = cc[1];
+  });
+  return qobj;
+}
+
+const createSelector = s => {
+
+  const formArea = document.getElementById("question");
+  
+  const select = document.createElement("select");
+  select.setAttribute("id", s.id);
+  select.setAttribute("name", s.id);
+  
+  for(name in s.list){
+    const option = document.createElement("option");
+    option.setAttribute("value", s.list[name]);
+    option.innerText = name;
+    select.appendChild(option);
+  }
+  
+  select.addEventListener("change", () => {refleshAll();} );
+  formArea.appendChild(select);  
+
+}
+
+const goToHazardMap = (lng, lat) => {
+  if( !lng || !lat){
+    alert("駅情報が不足しています。")
+  }else{
+    const url = `https://disaportal.gsi.go.jp/hazardmap/maps/index.html?ll=${lat},${lng}&z=15&base=pale&ls=seamless%7Cflood_l2_keizoku%2C0.8%7Cflood_list%2C0.8%7Cflood_l1%2C0.8%7Cflood_list_l2%2C0.75%7Cdisaster1&disp=000010&vs=c1j0l0u0t0h0z0`;
+    window.open(url, '_blank');
+  }
+}
+
+const queries = getQueryParams();
+
+const json = loadJSON(`./resultLineupStations.json`);
+
+const selecter = {
+  "id": "selecter",
+  "type": "select",
+  "title": "選択肢",
+  "list": {
+    "---": ""
+  }
+};
+
+for( company in json ){
+  selecter.list[company] = company;
+}
+
+createSelector(selecter);
+
+const refleshAll = () => {
+  
+  //好きな処理を入れる
+  
+  //選択肢の取得
+  const v = document.getElementById(selecter.id).value;
+  
+  const dataset = json[v];
+  
+  let html = "";
+  
+  for( line in dataset ){
+    const stations = dataset[line];
+    let item = "";
+    
+    stations.forEach( station => {
+      const p = station.properties;
+      
+      item += `<div class='set'>`;
+      
+      if(p.capacity){
+        const width = p.capacity/10000;
+        item += `<div class='interval' style='height:${width}px;' title='${Math.floor(p.capacity/1000)/10}万人'></div>`;
+      }else{
+        item += `<div class='blank'></div>`;
+      }
+      
+      const r = (p.r > 1) ? p.r : 255;
+      const g = (p.g > 1) ? p.g : 255;
+      const b = (p.b > 1) ? p.b : 255;
+      
+      const lng = station.geometry ? station.geometry.coordinates[0] : 0;
+      const lat = station.geometry ? station.geometry.coordinates[1] : 0;
+      
+      item += `<div class='station' style='background-color:rgb(${r},${g},${b});' onclick='goToHazardMap(${lng},${lat});'>${p.N02_005}</div>`;
+      
+      item += `</div>`;
+      
+    });
+    
+    const slide = `<div class='slide'>
+      <div class='title'>${v} - ${line}</div>
+      <div class='contents'>${item}</div>
+      <div class='footer'><strong class='strong'>※ハザードの情報はあくまで目安であり、実際のリスクはハザードマップ等を確認してください。</strong></div>
+    </div>`;
+    
+    html += ``
+    html += slide;
+    
+  }
+  
+  document.getElementById("main").innerHTML = html;
+}
+
+</script>
+
+</body>
+</html>
