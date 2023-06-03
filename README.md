@@ -3,10 +3,13 @@
 
 **鉄道駅の代表点が、浸水想定図でどの程度の浸水深となるかをざっくり把握するものです。利用の際は自己責任でお願いします** 
 
+* Web 地図で見る：https://mghs15.github.io/railway-station-with-flood-info/
+* 路線図（スライド形式）：https://mghs15.github.io/railway-station-with-flood-info/slides/
+
 ![サンプル1](image/sample1.png "地図上へ表示")
 ![サンプル2](image/sample2.png "路線図風のスライド")
 
-※上記地図画像の作成には、下記のデータの他、地理院地図Vector を利用。 
+※上記地図画像の作成には、下記のデータの他、地理院地図Vector のデータを利用。 
 
 ## 使い方
 
@@ -14,7 +17,7 @@
 * `mkGsimapsMarker.js`: 地理院地図で表示できるようにスタイルを調整するツール。
 * `lineup.js`: 得られた結果を路線図のような形で見られるように、pptx の構成ファイルへ変換するツール。
 
-最初だけ
+最初だけ、以下の通り。
 ```
 npm install
 ```
@@ -22,9 +25,9 @@ npm install
 データは、`data` ディレクトリを作成して格納。
 必要なのは、以下の通り。
 * 国土数値情報　鉄道データのうち、`N02-22_Station.geojson`（UTF-8。ファイル名は令和4年度の場合）。
-* 第12回大都市交通センサス調査結果集計表（路線別着時間帯別駅間輸送定員表）を加工（ヘッダー削除、CSV変換、5列名に1日の定員合計を算出等、数値のコンマを削除）したもの。`001178999.csv` として入れることを想定したコードになっている。
+* 第12回大都市交通センサス調査結果集計表（路線別着時間帯別駅間輸送定員表）を加工（ヘッダー削除、5列名に1日の定員合計を算出等、数値のコンマを削除、CSV変換、首都圏・中京圏・近畿圏のデータを結合）したもの。`railway-capacitycsv` として入れることを想定したコードになっている。
 
-一式作成
+一式作成は以下の通り。
 ```
 node main.js
 cp result.json stations-kozui-l2-v2.json
@@ -32,6 +35,13 @@ node mkGsimapsMarker.js
 mkdir pptx-slides
 node lineup.js
 ```
+生成したデータは公開用フォルダ `docs` へ格納。
+* `resultLineupStations.json`：`docs/slides`
+* `stations-kozui-l2-v2.json`：`docs` 直下
+
+また、`pptx-slides` 内に、スライド用 XML （PresentationML 形式）が生成される。
+
+`stations-kozui-l2-with-gsistyle.geojson` は地理院地図やハザードマップで表示できるようにスタイルを調整したもの。
 
 ## 利用したデータ
 * 国土数値情報　鉄道データ 令和4年度
