@@ -27,7 +27,7 @@ beadsArray.forEach( bead => {
  * https://www.mlit.go.jp/sogoseisaku/transport/sosei_transport_tk_000035.html
  * 路線別着時間帯別駅間輸送定員表 を加工（ヘッダー削除、CSV変換）
  */
-const stringText = fs.readFileSync("./data/001178999.csv", "utf-8");
+const stringText = fs.readFileSync("./data/railway-capacity.csv", "utf-8");
 
 
 /* 
