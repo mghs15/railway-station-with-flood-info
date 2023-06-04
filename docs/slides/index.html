@@ -52,23 +52,24 @@ body { margin:0; padding:0;}
 
 .set {
   display: grid;
-  grid-template-columns: 25px 25px;
+  grid-template-columns: 1fr 1fr;
 }
 
 .interval {
   display: inline-block;
-  width: 25px;
   background-color: rgb(0,0,100);
-  margin-top: 1em;
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .station {
   display: inline-block;
-  width: 25px;
   border-radius: 4px;
   border: solid 1px rgb(0,0,100);
   height: 100%;
+  width: 25px;
   text-align: center;
+  writing-mode: vertical-rl;
   cursor: pointer;
 }
 
@@ -77,7 +78,7 @@ body { margin:0; padding:0;}
 <body>
 
 <div id='note'>
-<strong class='strong'>本サイトのハザードの情報はあくまで目安であり、実際のリスクはハザードマップ等を確認してください。また、単純に誤りが含まれる可能性もあります。</strong>
+<strong class='strong'>本サイトのハザード情報はあくまで目安であり、実際のリスクは各自治体のハザードマップ等を確認してください。また、単純に誤りが含まれる可能性もあります。</strong>
 <br>
 本サイトは、鉄道駅のデータ（<a href="https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html" target="_blank">国土数値情報（令和4年度）</a>）から生成した代表点におけるハザード情報（<a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html" target="_blank">重ねるハザードマップ</a>の洪水浸水想定区域（想定最大規模））に応じて色分けしたものです。
 駅の構造や構造物の高さ、周辺の状況は考慮していません。<a href="https://www.mlit.go.jp/sogoseisaku/transport/sosei_transport_tk_000035.html" target="_blank">第12回大都市交通センサス</a>の下り輸送定員データを用いて、路線ごとの駅の順序や駅間の定員情報を示していますが、平成28年当時なので、現在と状況が異なる場合があります。</div>
@@ -183,7 +184,7 @@ const refleshAll = () => {
       item += `<div class='set'>`;
       
       if(p.capacity){
-        const width = p.capacity/10000;
+        const width = p.capacity/10000 + 1;
         item += `<div class='interval' style='height:${width}px;' title='${Math.floor(p.capacity/1000)/10}万人'></div>`;
       }else{
         item += `<div class='blank'></div>`;
@@ -205,7 +206,7 @@ const refleshAll = () => {
     const slide = `<div class='slide'>
       <div class='title'>${v} - ${line}</div>
       <div class='contents'>${item}</div>
-      <div class='footer'><strong class='strong'>※対象は洪水（想定最大規模）です。ハザードの情報はあくまで目安であり、実際のリスクはハザードマップ等を確認してください。</strong></div>
+      <div class='footer'><strong class='strong'>※対象は洪水（想定最大規模）です。<br>ハザード情報はあくまで目安であり、実際のリスクは各自治体のハザードマップ等を確認してください。</strong></div>
     </div>`;
     
     html += ``
