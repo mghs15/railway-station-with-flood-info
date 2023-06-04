@@ -8,6 +8,9 @@
 * Web 地図で見る：https://mghs15.github.io/railway-station-with-flood-info/
 * 路線図（スライド形式）：https://mghs15.github.io/railway-station-with-flood-info/slides/
 
+※洪水浸水想定区域（想定最大規模）、高潮浸水想定区域、津波浸水想定
+* 路線図（スライド形式、複数ハザード）：https://mghs15.github.io/railway-station-with-flood-info/slides/index2.html
+
 ### QGIS や Microsoft PowerPoint での表示例
 ※洪水浸水想定区域（想定最大規模）
 
@@ -44,9 +47,16 @@ node lineup.js
 * `resultLineupStations.json`：`docs/slides`
 * `stations-kozui-l2-v2.json`：`docs` 直下
 
-また、`pptx-slides` 内に、スライド用 XML （PresentationML 形式）が生成される。
+その他、`pptx-slides` 内に、スライド用 XML （PresentationML 形式）が生成される。
 
 `stations-kozui-l2-with-gsistyle.geojson` は地理院地図やハザードマップで表示できるようにスタイルを調整したもの。
+
+また、各災害の毎の `resultLineupStations.json` を作成した場合、それぞれ適宜名前を変更（例えば、`resultLineupStationsKozui.json`、`resultLineupStationsTakashio.json`、`resultLineupStationsTsunami.json` 等）し、以下のコマンドで統合版 `resultLineupStationsIntegrated.json` を作成できる。
+
+```
+node integrate.js
+```
+`resultLineupStationsIntegrated.json` は、`docs/slides` へ格納し、複数ハザードの路線図(`docs/index2.html`) で利用する。
 
 ## 利用したデータ
 * 国土数値情報　鉄道データ 令和4年度
@@ -57,7 +67,7 @@ node lineup.js
 	* 路線別着時間帯別駅間輸送定員表 を加工（ヘッダー削除、CSV変換）
 * 重ねるハザードマップ
 	* https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html
-	* 洪水浸水想定区域（想定最大規模）、高潮浸水想定区域
+	* 洪水浸水想定区域（想定最大規模）、高潮浸水想定区域、津波浸水想定
 
 ## 参考文献
 * http://officeopenxml.com/drwSp-nvCxnSpPr.php
