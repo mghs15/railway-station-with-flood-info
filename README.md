@@ -3,6 +3,8 @@
 
 **鉄道駅の代表点が、浸水想定図でどの程度の浸水深となるかをざっくり把握するものです。利用の際は自己責任でお願いします** 
 
+blog (Qiita) https://qiita.com/mg_kudo/items/a6b4b53f2cacfacac9a0
+
 ### デモサイト
 ※洪水浸水想定区域（想定最大規模）
 * Web 地図で見る：https://mghs15.github.io/railway-station-with-flood-info/
