@@ -129,7 +129,7 @@ const getQueryParams = () => {
 
 const queries = getQueryParams();
 
-const styleName = queries.style || "mono2-hazard";
+const styleName = queries.style || "railway";
 
 /*************************************************/
 /*Mapbox 関係設定                                */
@@ -137,7 +137,7 @@ const styleName = queries.style || "mono2-hazard";
 const map = new mapboxgl.Map({
   container: 'map', // container id
   hash: true, //add #position on URL
-  style: `./${styleName}.json`, // stylesheet location
+  style: `https://mghs15.github.io/styling-tools-for-gsi-optbv/${styleName}.json`, // stylesheet location
   center: [139.78148, 35.768793], // starting position [lng, lat]
   zoom: 9, // starting zoom
   minZoom: 4,
@@ -154,8 +154,50 @@ map.addControl(new mapboxgl.AttributionControl({compact: true}), 'top-right');
 
 map.showTileBoundaries = false;
 
+map.on('load', function(e) {
+  
+  map.addSource("station", {
+    "type": "geojson",
+    "data": "./stations-kozui-l2-v2.json",
+    "attribution":"<a href='https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html' target='_blank'>国土数値情報 鉄道データ（令和4年度）</a>|<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
+  });
 
+  map.addSource("flood-L2", {
+    "type": "raster",
+    "minzoom":2,
+    "maxzoom":17,
+    "tiles":["https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png"],
+    "tileSize": 256,
+    "attribution":"<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
+  });
 
+  map.addLayer({ 
+    "id":"flood-L2",
+    "type":"raster",
+    "source":"flood-L2",
+    "paint":{}
+  }, "水域");
+  
+  map.addLayer({ 
+    "id":"station",
+    "type":"circle",
+    "source":"station",
+    "paint":{
+      "circle-color": ["rgb", 
+        ["case", [">", ["get", "r"], 1], ["get", "r"], 255],
+        ["case", [">", ["get", "g"], 1], ["get", "g"], 255],
+        ["case", [">", ["get", "b"], 1], ["get", "b"], 255]
+      ],
+      "circle-radius": 4,
+      "circle-stroke-color": "hsl(230,50%,25%)",
+      "circle-stroke-width": 1
+    },
+    "layout":{
+      "circle-sort-key": ["get", "r"]
+    }
+  });
+
+});
 
 const makePopupHtml = (prop) => {
   
