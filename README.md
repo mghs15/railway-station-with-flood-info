@@ -6,13 +6,13 @@
 blog (Qiita) https://qiita.com/mg_kudo/items/a6b4b53f2cacfacac9a0
 
 ### デモサイト
-※洪水浸水想定区域（想定最大規模）
-* Web 地図で見る：https://mghs15.github.io/railway-station-with-flood-info/
-* 路線図（スライド形式）：https://mghs15.github.io/railway-station-with-flood-info/slides/
-
 ※洪水浸水想定区域（想定最大規模）、高潮浸水想定区域、津波浸水想定
+* Web 地図で見る：https://mghs15.github.io/railway-station-with-flood-info/
 * 路線図（スライド形式、複数ハザード）：https://mghs15.github.io/railway-station-with-flood-info/slides/index2.html
 
+※洪水浸水想定区域（想定最大規模）
+* 路線図（スライド形式）：https://mghs15.github.io/railway-station-with-flood-info/slides/
+* 
 ### QGIS や Microsoft PowerPoint での表示例
 ※洪水浸水想定区域（想定最大規模）
 
