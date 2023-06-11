@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8' />
+<title>駅とハザードのマップ</title>
+<meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+<script src='https://maps.gsi.go.jp/vector/mapbox/1.13.0/mapbox-gl-gsi.js'></script>
+<link href='https://maps.gsi.go.jp/vector/mapbox/1.13.0/mapbox-gl.css' rel='stylesheet' />
+<style>
+body { margin:0; padding:0;}
+
+
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0px;
+  width: 100%;
+}
+
+#menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,12em);
+  position: relative;
+  z-index: 100000;
+  padding: 5px 20px ;
+  margin: 0 0;
+  box-shadow: 0px 0px 0px 0px #eeeeee;
+  font-family: 'Open Sans', sans-serif;
+}
+
+button.local {
+  display: block;
+  text-align:center;
+  background: #dddddd;
+  padding 0 0.5em 0 0.5em;
+  border: solid 2px #ddd;
+  border-radius: 3px;
+  margin: 2.5px 0px 2.5px 0px;
+  line-height: 1.5em;
+  font-size: 1em;
+  width: 100%;
+}
+
+button.small {
+  text-align:center;
+  background: #dddddd;
+  padding 0 0.5em 0 0.5em;
+  border: solid 2px #aaa;
+  border-radius: 3px;
+  margin: 2.5px 0px 2.5px 0px;
+  line-height: 1.5em;
+  font-size: 1em;
+}
+
+div.button {
+  display: inline-block;
+  text-align:center;
+  background: #dddddd;
+  border: solid 2px #ddd;
+  border-radius: 3px;
+  margin: 2.5px 0px 2.5px 0px;
+  font-size: 1em;
+}
+
+
+div.button a {
+  background: #dddddd;
+  border: solid 1px #005;
+  border-radius: 3px;
+  font-size: 0.5em;
+}
+
+div.button.radio{
+  text-align: left;
+}
+
+#slider_01 {
+  //width: 80%;
+}
+
+#slider_02 {
+  //width: 80%;
+}
+
+#overlay-page {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #EEEEEE;
+  z-index: 1000000;
+  padding: 5px 20px;
+}
+
+table.popup-table {
+  //border-collapse: collapse;
+  border-top: solid 1px;
+  border-bottom: solid 1px;
+  margin-top: 5px;
+  width: 100%;
+}
+
+#note {
+  display: grid;
+  position: fixed;
+  z-index: 100000;
+  color: red;
+  width: 150px;
+  right: 10px;
+  bottom: 10px;
+}
+
+#alert, #legend {
+  text-align: right;
+  margin: 2px;
+  /*
+  pointer-events: none;
+  */
+}
+
+#alert-mark, #legend-mark {
+  border: solid 2px red;
+  border-radius: 4px;
+  font-weight: bold;
+  background: #FFFFFF;
+}
+
+#alert-icon, #legend-icon {
+  background: red;
+  color: #FFFFFF;
+}
+
+#legend img{
+  resize: both;
+  max-width: 150px;
+}
+
+</style>
+<body>
+
+<div id='menu' onchange="switchHazard();">
+  <form id="layer-choice" name="layerChoice">
+    <div class="button radio">
+      <input type="radio" id="hazard1" name="hazard" value="kozui-L2" checked>
+      <label for="kozui-L2">洪水（想定最大） <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#l2shinsuishin" target="_blank">info</a></label>
+    </div>
+    <div class="button radio">
+      <input type="radio" id="hazard2" name="hazard" value="takashio">
+      <label class="button local" for="takashio">高潮 <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#takashio" target="_blank">info</a></label>
+    </div>
+    <div class="button radio">
+      <input type="radio" id="hazard3" name="hazard" value="tsunami">
+      <label class="button local" for="tsunami">津波 <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#tsunami" target="_blank">info</a></label>
+    </div>
+  <form>
+</div>
+<div id='map'></div>
+<div id='note'>
+  <div id='legend' onclick="showLegend();">
+    <span id="legend-img" class='strong'></span>
+    <span id="legend-mark" style="display:none;"><span id="legend-icon">！</span>凡例</span>
+  </div>
+  <div id='alert' onclick="showAlert();">
+    <strong id="alert-text" class='strong'>本サイトのハザード情報はあくまで目安であり、実際のリスクは各自治体のハザードマップ等を確認してください。<br>また、単純に誤り等が含まれる可能性もあります。</strong>
+    <span id="alert-mark" style="display:none;"><span id="alert-icon">！</span>注意事項</span>
+  </div>
+</div>
+
+<script>
+
+const showAlert = () => {
+  const el = document.getElementById("alert-text");
+  const mk = document.getElementById("alert-mark");
+  if(el.style && el.style.display && el.style.display == "none"){
+    el.style.display = "inline-block";
+    mk.style.display = "none";
+  }else{
+    el.style.display = "none";
+    mk.style.display = "inline-block";
+  }
+}
+
+const showLegend = () => {
+  const el = document.getElementById("legend-img");
+  const mk = document.getElementById("legend-mark");
+  if(el.style && el.style.display && el.style.display == "none"){
+    el.style.display = "inline-block";
+    mk.style.display = "none";
+  }else{
+    el.style.display = "none";
+    mk.style.display = "inline-block";
+  }
+}
+
+const getQueryParams = () => {
+  const q = window.location.search;
+  const qq = q.slice(1);
+  const qset = qq.split("&");
+  const qobj = {};
+  qset.forEach( c => {
+    const cc = c.split("=");
+    qobj[cc[0]] = cc[1];
+  });
+  return qobj;
+}
+
+const queries = getQueryParams();
+
+const styleName = queries.style || "railway";
+
+/*************************************************/
+/*Mapbox 関係設定                                */
+/*************************************************/
+const map = new mapboxgl.Map({
+  container: 'map', // container id
+  hash: true, //add #position on URL
+  style: `https://mghs15.github.io/styling-tools-for-gsi-optbv/${styleName}.json`, // stylesheet location
+  center: [139.78148, 35.768793], // starting position [lng, lat]
+  zoom: 9, // starting zoom
+  minZoom: 4,
+  maxZoom: 17.99,
+  attributionControl: false,
+  //clickTolerance: 10,
+  localIdeographFontFamily: ['MS Gothic', 'Hiragino Kaku Gothic Pro', 'sans-serif']
+});
+
+
+map.addControl(new mapboxgl.NavigationControl(), 'top-right');
+map.addControl(new mapboxgl.ScaleControl() );
+map.addControl(new mapboxgl.AttributionControl({compact: true}), 'top-right');
+
+map.showTileBoundaries = false;
+
+const dataSet = {
+  "kozui-L2":{
+    "station": "./stations-kozui-l2-v2.json",
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/shinsui_legend2-1.png"
+  },
+  "takashio":{
+    "station": "./stations-takashio.json",
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/tsunami_newlegend.png"
+  },
+  "tsunami":{
+    "station": "./stations-tsunami.json",
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/tsunami_newlegend.png"
+  }
+}
+
+
+const switchHazard = () => {
+  const form = document.layerChoice;
+  const hazard = form.hazard.value;
+  
+  if(dataSet[hazard] && dataSet[hazard].station){
+    map.getSource("station").setData(dataSet[hazard].station);
+  }
+  
+  if(dataSet[hazard] && dataSet[hazard].hazardmap){
+    if(map.getLayer("hazardmap")) map.removeLayer("hazardmap");
+    if(map.getSource("hazardmap")) map.removeSource("hazardmap");
+    
+    map.addSource("hazardmap", {
+      "type": "raster",
+      "minzoom":2,
+      "maxzoom":17,
+      "tiles":[dataSet[hazard].hazardmap],
+      "tileSize": 256,
+      "attribution":"<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
+    });
+    map.addLayer({ 
+      "id":"hazardmap",
+      "type":"raster",
+      "source":"hazardmap",
+      "paint":{}
+    }, "水域");
+  }
+  
+  document.getElementById("legend-img").innerHTML = `<img src="${dataSet[hazard].legend}" />`;
+}
+
+map.on('load', function(e) {
+  
+  map.addSource("station", {
+    "type": "geojson",
+    "data": dataSet["kozui-L2"].station,
+    "attribution":"<a href='https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html' target='_blank'>国土数値情報 鉄道データ（令和4年度）</a>|<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
+  });
+
+  map.addSource("hazardmap", {
+    "type": "raster",
+    "minzoom":2,
+    "maxzoom":17,
+    "tiles":[dataSet["kozui-L2"].hazardmap],
+    "tileSize": 256,
+    "attribution":"<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
+  });
+
+  map.addLayer({ 
+    "id":"hazardmap",
+    "type":"raster",
+    "source":"hazardmap",
+    "paint":{}
+  }, "水域");
+  
+  map.addLayer({ 
+    "id":"station",
+    "type":"circle",
+    "source":"station",
+    "paint":{
+      "circle-color": ["rgb", 
+        ["case", [">", ["get", "r"], 1], ["get", "r"], 255],
+        ["case", [">", ["get", "g"], 1], ["get", "g"], 255],
+        ["case", [">", ["get", "b"], 1], ["get", "b"], 255]
+      ],
+      "circle-radius": 4,
+      "circle-stroke-color": "hsl(230,50%,25%)",
+      "circle-stroke-width": 1
+    },
+    "layout":{
+      "circle-sort-key": ["get", "r"]
+    }
+  });
+  
+  document.getElementById("legend-img").innerHTML = `<img src="${dataSet["kozui-L2"].legend}" />`;
+
+});
+
+
+
+const makePopupHtml = (prop) => {
+  
+  let htmlString = ""; //ポップアップ
+  let featureProperties = "";
+  for(name in prop){
+    if(name != "rank" && name != "interval"){
+      featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#555555;'>" + name + "</td>"
+                        + "<td style='color:#000000;'>" + prop[name] + "</td></tr>";
+    }
+  }
+  htmlString = htmlString + "<table class='popup-table'>" + featureProperties + "</table>";
+  
+  return htmlString;
+  
+}
+
+const popup = new mapboxgl.Popup();
+map.on('click', function(e) {
+  
+  //初期化
+  popup.remove();
+  
+  //レンダリングされた地物を取得
+  const sv = 3;
+  const bb = [
+    [e.point.x - sv, e.point.y - sv],
+    [e.point.x + sv, e.point.y + sv]
+  ];
+  const features = map.queryRenderedFeatures(bb);
+  
+  if (!features.length) {
+    popup.remove();
+    return;
+  }
+  
+  //ポップアップ表示処理
+  let htmlString = "";
+  features.forEach( feature => {
+    htmlString = htmlString + makePopupHtml(feature.properties);
+    console.log(feature);
+  });
+  
+  if (!htmlString || htmlString == "") {
+    popup.remove();
+    return;
+  }
+  
+  popup.setLngLat([ e.lngLat.lng, e.lngLat.lat ])
+    .setHTML(htmlString)
+    .addTo(map);
+});
+
+</script>
+
+</body>
+</html>
