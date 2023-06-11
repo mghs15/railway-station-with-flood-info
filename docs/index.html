@@ -82,17 +82,6 @@ div.button.radio{
   //width: 80%;
 }
 
-#note {
-  position: relative;
-  color: #FF0000;
-  font-family: 'Open Sans', sans-serif;
-  font-weight: bold;
-  right: 0.5em;
-  text-align: right;
-  text-shadow: #FFFFFF 0.2em 0.2em 0.2em, #FFFFFF -0.2em 0.2em 0.2em, #FFFFFF 0.2em -0.2em 0.2em, #FFFFFF -0.2em -0.2em 0.2em;
-}
-
-
 #overlay-page {
   position: absolute;
   top: 0;
@@ -112,31 +101,41 @@ table.popup-table {
   width: 100%;
 }
 
-#alert {
+#note {
+  display: grid;
   position: fixed;
   z-index: 100000;
   color: red;
   width: 150px;
-  right: 1em;
-  bottom: 1em;
+  right: 10px;
+  bottom: 10px;
+}
+
+#alert, #legend {
   text-align: right;
+  margin: 2px;
   /*
   pointer-events: none;
   */
 }
 
-
-#alert-mark {
+#alert-mark, #legend-mark {
   border: solid 2px red;
   border-radius: 4px;
   font-weight: bold;
   background: #FFFFFF;
 }
 
-#alert-icon {
+#alert-icon, #legend-icon {
   background: red;
   color: #FFFFFF;
 }
+
+#legend img{
+  resize: both;
+  max-width: 150px;
+}
+
 </style>
 <body>
 
@@ -157,9 +156,15 @@ table.popup-table {
   <form>
 </div>
 <div id='map'></div>
-<div id='alert' onclick="showAlert();">
-  <strong id="alert-text" class='strong'>本サイトのハザード情報はあくまで目安であり、実際のリスクは各自治体のハザードマップ等を確認してください。<br>また、単純に誤り等が含まれる可能性もあります。</strong>
-  <span id="alert-mark" style="display:none;"><span id="alert-icon">！</span>注意事項</span>
+<div id='note'>
+  <div id='legend' onclick="showLegend();">
+    <span id="legend-img" class='strong'></span>
+    <span id="legend-mark" style="display:none;"><span id="legend-icon">！</span>凡例</span>
+  </div>
+  <div id='alert' onclick="showAlert();">
+    <strong id="alert-text" class='strong'>本サイトのハザード情報はあくまで目安であり、実際のリスクは各自治体のハザードマップ等を確認してください。<br>また、単純に誤り等が含まれる可能性もあります。</strong>
+    <span id="alert-mark" style="display:none;"><span id="alert-icon">！</span>注意事項</span>
+  </div>
 </div>
 
 <script>
@@ -167,6 +172,18 @@ table.popup-table {
 const showAlert = () => {
   const el = document.getElementById("alert-text");
   const mk = document.getElementById("alert-mark");
+  if(el.style && el.style.display && el.style.display == "none"){
+    el.style.display = "inline-block";
+    mk.style.display = "none";
+  }else{
+    el.style.display = "none";
+    mk.style.display = "inline-block";
+  }
+}
+
+const showLegend = () => {
+  const el = document.getElementById("legend-img");
+  const mk = document.getElementById("legend-mark");
   if(el.style && el.style.display && el.style.display == "none"){
     el.style.display = "inline-block";
     mk.style.display = "none";
@@ -209,7 +226,7 @@ const map = new mapboxgl.Map({
 });
 
 
-map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
+map.addControl(new mapboxgl.NavigationControl(), 'top-right');
 map.addControl(new mapboxgl.ScaleControl() );
 map.addControl(new mapboxgl.AttributionControl({compact: true}), 'top-right');
 
@@ -218,15 +235,18 @@ map.showTileBoundaries = false;
 const dataSet = {
   "kozui-L2":{
     "station": "./stations-kozui-l2-v2.json",
-    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png"
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/shinsui_legend2-1.png"
   },
   "takashio":{
     "station": "./stations-takashio.json",
-    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_data/{z}/{x}/{y}.png"
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/03_hightide_l2_shinsuishin_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/tsunami_newlegend.png"
   },
   "tsunami":{
     "station": "./stations-tsunami.json",
-    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png"
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/04_tsunami_newlegend_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/tsunami_newlegend.png"
   }
 }
 
@@ -258,6 +278,8 @@ const switchHazard = () => {
       "paint":{}
     }, "水域");
   }
+  
+  document.getElementById("legend-img").innerHTML = `<img src="${dataSet[hazard].legend}" />`;
 }
 
 map.on('load', function(e) {
@@ -302,6 +324,8 @@ map.on('load', function(e) {
       "circle-sort-key": ["get", "r"]
     }
   });
+  
+  document.getElementById("legend-img").innerHTML = `<img src="${dataSet["kozui-L2"].legend}" />`;
 
 });
 
@@ -312,8 +336,10 @@ const makePopupHtml = (prop) => {
   let htmlString = ""; //ポップアップ
   let featureProperties = "";
   for(name in prop){
-    featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#555555;'>" + name + "</td>"
-                      + "<td style='color:#000000;'>" + prop[name] + "</td></tr>";
+    if(name != "rank" && name != "interval"){
+      featureProperties = featureProperties + "<tr><td style='vertical-align:top; color:#555555;'>" + name + "</td>"
+                        + "<td style='color:#000000;'>" + prop[name] + "</td></tr>";
+    }
   }
   htmlString = htmlString + "<table class='popup-table'>" + featureProperties + "</table>";
   
