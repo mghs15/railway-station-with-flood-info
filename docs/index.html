@@ -265,7 +265,7 @@ const dataSet = {
   },
   "flood-duration":{
     "station": "./stations-flood-duration.json",
-    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_keizoku_data/{z}/{x}/{y}.png",
     "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/shinsui_legend_l2_keizoku.png"
   },
   "takashio":{
@@ -341,10 +341,22 @@ map.on('load', function(e) {
     "type":"circle",
     "source":"station",
     "paint":{
-      "circle-color": ["rgb", 
-        ["case", [">", ["get", "r"], 1], ["get", "r"], 255],
-        ["case", [">", ["get", "g"], 1], ["get", "g"], 255],
-        ["case", [">", ["get", "b"], 1], ["get", "b"], 255]
+      "circle-color": [
+        "case",
+        [
+          "any",
+          [">", ["get", "r"], 1],
+          [">", ["get", "g"], 1],
+          [">", ["get", "b"], 1]
+        ],
+        [
+          "rgba", 
+          ["get", "r"], 
+          ["get", "g"], 
+          ["get", "b"], 
+          1,
+        ],
+        ["rgba", 255, 255, 255, 1]
       ],
       "circle-radius": 4,
       "circle-stroke-color": "hsl(230,50%,25%)",
