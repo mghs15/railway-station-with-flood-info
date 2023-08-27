@@ -28,6 +28,23 @@ body { margin:0; padding:0;}
   font-family: 'Open Sans', sans-serif;
 }
 
+#layer-choice {
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: repeat(auto-fill,1fr);
+  gap: 4px;
+}
+
+.box-1-1 {
+  grid-row: span 1;
+  grid-column: span 1;
+}
+
+.box-1-2 {
+  grid-row: span 1;
+  grid-column: span 2;
+}
+
 button.local {
   display: block;
   text-align:center;
@@ -58,7 +75,6 @@ div.button {
   background: #dddddd;
   border: solid 2px #ddd;
   border-radius: 3px;
-  margin: 2.5px 0px 2.5px 0px;
   font-size: 1em;
 }
 
@@ -141,17 +157,26 @@ table.popup-table {
 
 <div id='menu' onchange="switchHazard();">
   <form id="layer-choice" name="layerChoice">
-    <div class="button radio">
-      <input type="radio" id="hazard1" name="hazard" value="kozui-L2" checked>
-      <label for="kozui-L2">洪水（想定最大） <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#l2shinsuishin" target="_blank">info</a></label>
+    <div class="button radio box-1-2">
+      <input type="radio" id="hazard1" name="hazard" value="flood" checked>
+      <label class="button local" for="flood">洪水（想定最大） <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#l2shinsuishin" target="_blank">info</a></label>
     </div>
-    <div class="button radio">
+    <div class="button radio box-1-2">
+      <input type="radio" id="hazard1-2" name="hazard" value="flood-duration">
+      <label class="button local" for="flood-duration">洪水の浸水継続時間（想定最大） <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#l2shinsuikeizoku" target="_blank">info</a></label>
+    </div>
+    <div class="button radio box-1-1">
       <input type="radio" id="hazard2" name="hazard" value="takashio">
       <label class="button local" for="takashio">高潮 <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#takashio" target="_blank">info</a></label>
     </div>
-    <div class="button radio">
+    <div class="button radio box-1-1">
       <input type="radio" id="hazard3" name="hazard" value="tsunami">
       <label class="button local" for="tsunami">津波 <a href="https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html#tsunami" target="_blank">info</a></label>
+    </div>
+    <div class="button radio box-1-2" 
+      onclick="window.open('https://mghs15.github.io/flagment-inter-station/slides/')"
+      style="cursor:pointer;text-align:center;">
+      スライド形式で見る
     </div>
   <form>
 </div>
@@ -233,10 +258,15 @@ map.addControl(new mapboxgl.AttributionControl({compact: true}), 'top-right');
 map.showTileBoundaries = false;
 
 const dataSet = {
-  "kozui-L2":{
-    "station": "./stations-kozui-l2-v2.json",
+  "flood":{
+    "station": "./stations-flood.json",
     "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
     "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/shinsui_legend2-1.png"
+  },
+  "flood-duration":{
+    "station": "./stations-flood-duration.json",
+    "hazardmap": "https://disaportaldata.gsi.go.jp/raster/01_flood_l2_shinsuishin_data/{z}/{x}/{y}.png",
+    "legend": "https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/img/shinsui_legend_l2_keizoku.png"
   },
   "takashio":{
     "station": "./stations-takashio.json",
@@ -286,7 +316,7 @@ map.on('load', function(e) {
   
   map.addSource("station", {
     "type": "geojson",
-    "data": dataSet["kozui-L2"].station,
+    "data": dataSet["flood"].station,
     "attribution":"<a href='https://nlftp.mlit.go.jp/ksj/gml/datalist/KsjTmplt-N02-v3_1.html' target='_blank'>国土数値情報 鉄道データ（令和4年度）</a>|<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
   });
 
@@ -294,7 +324,7 @@ map.on('load', function(e) {
     "type": "raster",
     "minzoom":2,
     "maxzoom":17,
-    "tiles":[dataSet["kozui-L2"].hazardmap],
+    "tiles":[dataSet["flood"].hazardmap],
     "tileSize": 256,
     "attribution":"<a href='https://disaportal.gsi.go.jp/hazardmapportal/hazardmap/copyright/opendata.html' target='_blank'>重ねるハザードマップ</a>"
   });
@@ -325,7 +355,7 @@ map.on('load', function(e) {
     }
   });
   
-  document.getElementById("legend-img").innerHTML = `<img src="${dataSet["kozui-L2"].legend}" />`;
+  document.getElementById("legend-img").innerHTML = `<img src="${dataSet["flood"].legend}" />`;
 
 });
 
