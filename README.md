@@ -6,10 +6,10 @@
 blog (Qiita) https://qiita.com/mg_kudo/items/a6b4b53f2cacfacac9a0
 
 ### デモサイト
-※洪水浸水想定区域（想定最大規模）、高潮浸水想定区域、津波浸水想定
+※洪水浸水想定区域（想定最大規模）、洪水の浸水継続時間（想定最大規模）、高潮浸水想定区域、津波浸水想定
 * Web 地図で見る：https://mghs15.github.io/railway-station-with-flood-info/
 * 路線図（スライド形式、複数ハザード）：https://mghs15.github.io/railway-station-with-flood-info/slides/index2.html
-	* ３大都市圏のみ。全国版は以下の URL で公開中。
+	* ３大都市圏のみ（浸水継続時間を除く）。全国版（浸水継続時間を含む）は以下の URL で公開中。
  		* URL: https://mghs15.github.io/flagment-inter-station/slides/
 		* レポジトリ: https://github.com/mghs15/flagment-inter-station 
 
@@ -54,7 +54,11 @@ node lineup.js
 生成したデータは公開用フォルダ `docs` へ格納。
 * `resultLineupStations.json`：`docs/slides`
 * `stations-kozui-l2-v2.json`：`docs` 直下
-	* 災害種別に応じて適切に名前を変更。
+	* 災害種別に応じて名前を変更（以下は例）。
+  		* 洪水（想定最大）：`stations-flood.json`
+  		* 洪水/浸水継続時間（想定最大）：`stations-flood-duration.json`
+  		* 高潮：`stations-takashio.json`
+  		* 津波：`stations-tsunami.json`
 	* 名前を変更した場合、後工程のプログラムのファイル指定等も修正が必要。
 
 その他、各種ファイルが生成される。
@@ -77,7 +81,7 @@ node integrate.js
 	* 路線別着時間帯別駅間輸送定員表 を加工（ヘッダー削除、CSV変換）
 * 重ねるハザードマップ
 	* https://disaportal.gsi.go.jp/hazardmap/copyright/opendata.html
-	* 洪水浸水想定区域（想定最大規模）、高潮浸水想定区域、津波浸水想定
+	* 洪水浸水想定区域（想定最大規模）・浸水継続時間（想定最大規模）、高潮浸水想定区域、津波浸水想定
 
 ## 参考文献
 * http://officeopenxml.com/drwSp-nvCxnSpPr.php
