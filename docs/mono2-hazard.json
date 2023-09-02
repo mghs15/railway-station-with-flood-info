@@ -2,9 +2,9 @@
 "sources":{
   "v":{
     "type":"vector",
-    "minzoom":0,
+    "minzoom":4,
     "maxzoom":16,
-    "tiles":["https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/{z}/{x}/{y}.pbf"],
+    "tiles":["pmtiles://https://cyberjapandata.gsi.go.jp/xyz/optimal_bvmap-v1/optimal_bvmap-v1.pmtiles/{z}/{x}/{y}"],
     "attribution":"国土地理院最適化ベクトルタイル"
   },
   "station":{
