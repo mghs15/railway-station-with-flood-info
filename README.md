@@ -1,7 +1,8 @@
 # railway-station-with-flood-info
 鉄道駅と浸水想定図の関係を可視化
 
-**鉄道駅の代表点が、浸水想定図でどの程度の浸水深となるかをざっくり把握するものです。利用の際は自己責任でお願いします** 
+> [!CAUTION]
+> **鉄道駅の代表点が、浸水想定図でどの程度の浸水深となるかをざっくり把握するものです。利用の際は自己責任でお願いします** 
 
 blog (Qiita) https://qiita.com/mg_kudo/items/a6b4b53f2cacfacac9a0
 
